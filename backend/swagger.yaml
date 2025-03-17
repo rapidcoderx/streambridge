@@ -1,0 +1,807 @@
+openapi: 3.0.3
+info:
+  title: Message Hub API
+  description: |-
+    API for the Message Hub service, providing capabilities to publish and consume messages from Kafka and RabbitMQ.
+  version: 1.0.0
+  contact:
+    email: support@example.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:3000
+    description: Local development server
+  - url: https://message-hub.example.com
+    description: Production server
+
+tags:
+  - name: messages
+    description: Message operations
+  - name: authentication
+    description: Authentication operations
+  - name: health
+    description: Health check endpoints
+
+paths:
+  /api/messages:
+    post:
+      tags:
+        - messages
+      summary: Publish a message
+      description: Publishes a message to Kafka or RabbitMQ
+      operationId: publishMessage
+      security:
+        - ApiKeyAuth: []
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PublishMessageRequest'
+      responses:
+        '200':
+          description: Message published successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublishMessageResponse'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/messages/history:
+    get:
+      tags:
+        - messages
+      summary: Get message history
+      description: Retrieves message history for a destination
+      operationId: getMessageHistory
+      security:
+        - ApiKeyAuth: []
+        - BearerAuth: []
+      parameters:
+        - name: destination
+          in: query
+          description: Message destination (topic or queue)
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: Maximum number of messages to return
+          required: false
+          schema:
+            type: integer
+            default: 100
+            minimum: 1
+            maximum: 1000
+        - name: offset
+          in: query
+          description: Number of messages to skip
+          required: false
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+      responses:
+        '200':
+          description: Message history retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageHistoryResponse'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/messages/destinations:
+    get:
+      tags:
+        - messages
+      summary: Get available destinations
+      description: Retrieves available topics and queues
+      operationId: getDestinations
+      security:
+        - ApiKeyAuth: []
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Destinations retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DestinationsResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/messages/schemas:
+    get:
+      tags:
+        - messages
+      summary: Get message schemas
+      description: Retrieves available message schemas
+      operationId: getMessageSchemas
+      security:
+        - ApiKeyAuth: []
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Schemas retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  $ref: '#/components/schemas/JsonSchema'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/messages/{destination}:
+    delete:
+      tags:
+        - messages
+      summary: Delete messages
+      description: Deletes messages from a destination (admin only)
+      operationId: deleteMessages
+      security:
+        - ApiKeyAuth: []
+        - BearerAuth: []
+      parameters:
+        - name: destination
+          in: path
+          description: Message destination (topic or queue)
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Messages deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/auth/login:
+    post:
+      tags:
+        - authentication
+      summary: User login
+      description: Authenticates a user and returns a JWT token
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - password
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+                  format: password
+      responses:
+        '200':
+          description: Authentication successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          description: Authentication failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/auth/refresh:
+    post:
+      tags:
+        - authentication
+      summary: Refresh token
+      description: Refreshes an authentication token
+      operationId: refreshToken
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - refreshToken
+              properties:
+                refreshToken:
+                  type: string
+      responses:
+        '200':
+          description: Token refreshed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          description: Invalid refresh token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/auth/apikey:
+    post:
+      tags:
+        - authentication
+      summary: Generate API key
+      description: Generates an API key for a user
+      operationId: generateApiKey
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Name for the API key
+                permissions:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: API key generated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  apiKey:
+                    type: string
+                  keyId:
+                    type: string
+                  expiresAt:
+                    type: string
+                    format: date-time
+                    nullable: true
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/auth/apikey/{keyId}:
+    delete:
+      tags:
+        - authentication
+      summary: Revoke API key
+      description: Revokes an API key
+      operationId: revokeApiKey
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: keyId
+          in: path
+          description: API key ID
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: API key revoked successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: API key not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /health:
+    get:
+      tags:
+        - health
+      summary: Basic health check
+      description: Checks if the service is running
+      operationId: healthCheck
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [ok]
+                  timestamp:
+                    type: string
+                    format: date-time
+                  service:
+                    type: string
+        '500':
+          description: Service is unhealthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /health/detailed:
+    get:
+      tags:
+        - health
+      summary: Detailed health check
+      description: Provides detailed health information about all components
+      operationId: detailedHealthCheck
+      responses:
+        '200':
+          description: Service health details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DetailedHealthResponse'
+        '500':
+          description: Health check failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /health/kafka:
+    get:
+      tags:
+        - health
+      summary: Kafka health check
+      description: Checks Kafka connection status
+      operationId: kafkaHealthCheck
+      responses:
+        '200':
+          description: Kafka is connected
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComponentHealth'
+        '503':
+          description: Kafka is disconnected
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComponentHealth'
+
+  /health/rabbitmq:
+    get:
+      tags:
+        - health
+      summary: RabbitMQ health check
+      description: Checks RabbitMQ connection status
+      operationId: rabbitmqHealthCheck
+      responses:
+        '200':
+          description: RabbitMQ is connected
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComponentHealth'
+        '503':
+          description: RabbitMQ is disconnected
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComponentHealth'
+
+  /health/websocket:
+    get:
+      tags:
+        - health
+      summary: WebSocket health check
+      description: Checks WebSocket server status
+      operationId: websocketHealthCheck
+      responses:
+        '200':
+          description: WebSocket server is running
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebSocketHealth'
+        '503':
+          description: WebSocket server is stopped
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebSocketHealth'
+
+components:
+  schemas:
+    PublishMessageRequest:
+      type: object
+      required:
+        - destination
+        - message
+      properties:
+        destination:
+          type: string
+          description: Destination topic or queue (use rabbitmq:// or kafka:// prefix to specify protocol)
+          example: "kafka://orders"
+        message:
+          description: Message content
+          example: {"orderId": "12345", "customer": "John Doe"}
+        messageType:
+          type: string
+          description: Message type for schema validation
+          example: "order"
+        routingKey:
+          type: string
+          description: Routing key for RabbitMQ
+          example: "new.order"
+        headers:
+          type: object
+          description: Message headers
+          example: {"priority": "high"}
+        options:
+          type: object
+          description: Additional options
+          example: {"broadcast": true, "directQueue": false}
+
+    PublishMessageResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        transactionId:
+          type: string
+        destination:
+          type: string
+        protocol:
+          type: string
+          enum: [kafka, rabbitmq]
+        timestamp:
+          type: string
+          format: date-time
+
+    MessageHistoryResponse:
+      type: object
+      properties:
+        messages:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              destination:
+                type: string
+              timestamp:
+                type: string
+                format: date-time
+              message:
+                type: object
+              headers:
+                type: object
+        pagination:
+          type: object
+          properties:
+            totalCount:
+              type: integer
+            limit:
+              type: integer
+            offset:
+              type: integer
+            hasMore:
+              type: boolean
+
+    DestinationsResponse:
+      type: object
+      properties:
+        kafka:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              messageCount:
+                type: integer
+              partitions:
+                type: integer
+        rabbitmq:
+          type: object
+          properties:
+            queues:
+              type: array
+              items:
+                type: object
+                properties:
+                  name:
+                    type: string
+                  messageCount:
+                    type: integer
+                  consumers:
+                    type: integer
+            exchanges:
+              type: array
+              items:
+                type: object
+                properties:
+                  name:
+                    type: string
+                  type:
+                    type: string
+                  queues:
+                    type: array
+                    items:
+                      type: string
+
+    JsonSchema:
+      type: object
+      properties:
+        type:
+          type: string
+        required:
+          type: array
+          items:
+            type: string
+        properties:
+          type: object
+          additionalProperties:
+            type: object
+
+    AuthResponse:
+      type: object
+      properties:
+        token:
+          type: string
+        refreshToken:
+          type: string
+        expiresIn:
+          type: integer
+        tokenType:
+          type: string
+          enum: [Bearer]
+
+    ComponentHealth:
+      type: object
+      properties:
+        component:
+          type: string
+        status:
+          type: string
+          enum: [connected, disconnected, running, stopped]
+        timestamp:
+          type: string
+          format: date-time
+
+    WebSocketHealth:
+      type: object
+      properties:
+        component:
+          type: string
+        status:
+          type: string
+          enum: [running, stopped]
+        clients:
+          type: integer
+        topics:
+          type: object
+          additionalProperties:
+            type: integer
+        timestamp:
+          type: string
+          format: date-time
+
+    DetailedHealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [healthy, degraded, unhealthy]
+        timestamp:
+          type: string
+          format: date-time
+        service:
+          type: string
+        version:
+          type: string
+        components:
+          type: object
+          properties:
+            kafka:
+              type: string
+              enum: [connected, disconnected]
+            rabbitmq:
+              type: string
+              enum: [connected, disconnected]
+            websocket:
+              type: string
+              enum: [running, stopped]
+        websocket:
+          type: object
+          properties:
+            clients:
+              type: integer
+            topics:
+              type: object
+              additionalProperties:
+                type: integer
+        system:
+          type: object
+          properties:
+            uptime:
+              type: object
+              properties:
+                seconds:
+                  type: number
+                formatted:
+                  type: string
+            memory:
+              type: object
+              properties:
+                total:
+                  type: string
+                free:
+                  type: string
+                usage:
+                  type: string
+                heapTotal:
+                  type: string
+                heapUsed:
+                  type: string
+                external:
+                  type: string
+            cpu:
+              type: object
+              properties:
+                user:
+                  type: number
+                system:
+                  type: number
+                loadAvg:
+                  type: array
+                  items:
+                    type: number
+            platform:
+              type: string
+            arch:
+              type: string
+            nodeVersion:
+              type: string
+
+    Error:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [error]
+        statusCode:
+          type: integer
+        message:
+          type: string
+        details:
+          type: object
+
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

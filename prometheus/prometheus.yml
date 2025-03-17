@@ -1,0 +1,36 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  scrape_timeout: 10s
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  - job_name: 'message-hub-backend'
+    metrics_path: /metrics
+    scrape_interval: 10s
+    static_configs:
+      - targets: ['backend:3000']
+        labels:
+          service: 'message-hub'
+          environment: 'production'
+
+  - job_name: 'kafka'
+    static_configs:
+      - targets: ['kafka-exporter:9308']
+        labels:
+          service: 'kafka'
+
+  - job_name: 'rabbitmq'
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['rabbitmq-exporter:9419']
+        labels:
+          service: 'rabbitmq'
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: []

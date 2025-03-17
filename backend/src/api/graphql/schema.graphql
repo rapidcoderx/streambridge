@@ -1,0 +1,342 @@
+# Message Hub GraphQL Schema
+
+"""
+Message resource representing a message in a topic or queue
+"""
+type Message {
+  # Message ID
+  id: ID!
+
+  # Message type/category
+  messageType: String
+
+  # Destination (topic or queue)
+  destination: String!
+
+  # Protocol (kafka or rabbitmq)
+  protocol: Protocol!
+
+  # Message content (can be any valid JSON)
+  content: JSONObject!
+
+  # Message headers
+  headers: JSONObject
+
+  # Transaction ID
+  transactionId: String
+
+  # Timestamp when the message was created
+  timestamp: DateTime!
+
+  # Publisher information
+  publisher: String
+}
+
+"""
+Destination represents a Kafka topic or RabbitMQ queue/exchange
+"""
+type Destination {
+  # Destination name
+  name: String!
+
+  # Protocol (kafka or rabbitmq)
+  protocol: Protocol!
+
+  # Type of destination (topic, queue, exchange)
+  type: DestinationType!
+
+  # Approximate message count
+  messageCount: Int
+
+  # For Kafka: number of partitions
+  partitions: Int
+
+  # For RabbitMQ: number of active consumers
+  consumers: Int
+
+  # For RabbitMQ exchanges: exchange type
+  exchangeType: String
+
+  # For RabbitMQ exchanges: list of bound queues
+  boundQueues: [String]
+}
+
+"""
+Protocol enum for message brokers
+"""
+enum Protocol {
+  KAFKA
+  RABBITMQ
+}
+
+"""
+Destination type enum
+"""
+enum DestinationType {
+  TOPIC
+  QUEUE
+  EXCHANGE
+}
+
+"""
+Input type for publishing a message
+"""
+input PublishMessageInput {
+  # Destination to publish to (topic or queue name)
+  destination: String!
+
+  # Protocol (kafka or rabbitmq)
+  protocol: Protocol!
+
+  # Message content (any JSON object)
+  message: JSONObject!
+
+  # Message type for validation
+  messageType: String
+
+  # For RabbitMQ: routing key
+  routingKey: String
+
+  # Message headers
+  headers: JSONObject
+
+  # Additional options
+  options: JSONObject
+}
+
+"""
+Input type for filtering messages
+"""
+input MessageFilterInput {
+  # Destination name
+  destination: String
+
+  # Protocol
+  protocol: Protocol
+
+  # Message type
+  messageType: String
+
+  # Start timestamp
+  from: DateTime
+
+  # End timestamp
+  to: DateTime
+
+  # Content filter (JSONPath expression)
+  contentFilter: String
+
+  # Header filter
+  headerFilter: JSONObject
+}
+
+"""
+Pagination input
+"""
+input PaginationInput {
+  # Number of items to skip
+  offset: Int = 0
+
+  # Maximum number of items to return
+  limit: Int = 50
+}
+
+"""
+Message pagination result
+"""
+type MessageConnection {
+  # List of messages
+  edges: [MessageEdge!]!
+
+  # Pagination information
+  pageInfo: PageInfo!
+
+  # Total count of messages matching the filter
+  totalCount: Int!
+}
+
+"""
+Message edge with cursor
+"""
+type MessageEdge {
+  # Message node
+  node: Message!
+
+  # Pagination cursor
+  cursor: String!
+}
+
+"""
+Page information for pagination
+"""
+type PageInfo {
+  # Cursor for the first edge
+  startCursor: String
+
+  # Cursor for the last edge
+  endCursor: String
+
+  # Whether there are more items before
+  hasPreviousPage: Boolean!
+
+  # Whether there are more items after
+  hasNextPage: Boolean!
+}
+
+"""
+Health check information
+"""
+type HealthInfo {
+  # Overall status
+  status: String!
+
+  # Kafka connection status
+  kafka: ConnectionStatus!
+
+  # RabbitMQ connection status
+  rabbitmq: ConnectionStatus!
+
+  # WebSocket server status
+  websocket: WebSocketStatus!
+
+  # System metrics
+  system: SystemMetrics
+}
+
+"""
+Connection status
+"""
+type ConnectionStatus {
+  # Connection state
+  connected: Boolean!
+
+  # Additional status information
+  details: String
+}
+
+"""
+WebSocket server status
+"""
+type WebSocketStatus {
+  # Whether the server is running
+  running: Boolean!
+
+  # Number of connected clients
+  clients: Int!
+
+  # Active topics
+  topics: [String!]
+}
+
+"""
+System metrics
+"""
+type SystemMetrics {
+  # Uptime in seconds
+  uptime: Float!
+
+  # Memory usage in MB
+  memoryUsage: Float!
+
+  # CPU usage percentage
+  cpuUsage: Float!
+
+  # Current message rate (messages/second)
+  messageRate: Float!
+}
+
+"""
+Schema for message validation
+"""
+type MessageSchema {
+  # Schema name/type
+  name: String!
+
+  # JSON Schema definition
+  schema: JSONObject!
+
+  # Human-readable description
+  description: String
+
+  # Example message conforming to the schema
+  example: JSONObject
+}
+
+"""
+Subscription for real-time messages
+"""
+type MessageSubscription {
+  # The message that was received
+  message: Message!
+
+  # Subscription ID
+  subscriptionId: ID!
+}
+
+"""
+Custom scalar types
+"""
+scalar DateTime
+scalar JSONObject
+scalar JSON
+
+"""
+Query root type
+"""
+type Query {
+  # Get a message by ID
+  message(id: ID!): Message
+
+  # List messages with filtering and pagination
+  messages(filter: MessageFilterInput, pagination: PaginationInput): MessageConnection!
+
+  # Get available destinations (topics, queues, exchanges)
+  destinations(protocol: Protocol): [Destination!]!
+
+  # Get details about a specific destination
+  destination(name: String!, protocol: Protocol!): Destination
+
+  # Get health information
+  health: HealthInfo!
+
+  # Get message schemas for validation
+  messageSchemas: [MessageSchema!]!
+
+  # Get a specific message schema
+  messageSchema(name: String!): MessageSchema
+}
+
+"""
+Mutation root type
+"""
+type Mutation {
+  # Publish a message
+  publishMessage(input: PublishMessageInput!): Message!
+
+  # Create a new destination (topic or queue)
+  createDestination(name: String!, protocol: Protocol!, options: JSONObject): Destination!
+
+  # Delete messages from a destination
+  deleteMessages(destination: String!, protocol: Protocol!): Boolean!
+
+  # Add a new message schema
+  addMessageSchema(name: String!, schema: JSONObject!, description: String, example: JSONObject): MessageSchema!
+}
+
+"""
+Subscription root type
+"""
+type Subscription {
+  # Subscribe to messages from a destination
+  messageReceived(destination: String!, protocol: Protocol!): MessageSubscription!
+
+  # Subscribe to all messages
+  allMessages: MessageSubscription!
+}
+
+# Schema definition
+schema {
+  query: Query
+  mutation: Mutation
+  subscription: Subscription
+}

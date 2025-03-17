@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Message Hub - Kafka & RabbitMQ Client</title>
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="icon" type="image/png" href="assets/img/favicon.png">
+    <meta name="description" content="Message Hub - A unified interface for Kafka and RabbitMQ messaging">
+</head>
+<body>
+<div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+        <div class="logo">
+            <img src="assets/img/logo.svg" alt="Message Hub Logo">
+            <h1>Message Hub</h1>
+        </div>
+        <div class="header-controls">
+            <div class="connection-status">
+                <span class="status-indicator" id="connection-indicator"></span>
+                <span id="connection-text">Connecting...</span>
+            </div>
+            <div class="theme-switcher">
+                <button id="theme-toggle" title="Toggle dark/light mode">
+                    <i class="fas fa-moon" id="dark-icon"></i>
+                    <i class="fas fa-sun" id="light-icon"></i>
+                </button>
+            </div>
+            <div class="user-menu">
+                <button id="user-menu-button">
+                    <i class="fas fa-user"></i>
+                </button>
+                <div class="user-dropdown" id="user-dropdown">
+                    <button id="login-button" class="dropdown-item">Login</button>
+                    <button id="settings-button" class="dropdown-item">Settings</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main content -->
+    <main class="app-content">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>Destinations</h2>
+                <button id="refresh-destinations"><i class="fas fa-sync-alt"></i></button>
+            </div>
+
+            <div class="sidebar-section">
+                <h3>Kafka Topics</h3>
+                <ul class="destination-list" id="kafka-topics"></ul>
+            </div>
+
+            <div class="sidebar-section">
+                <h3>RabbitMQ Queues</h3>
+                <ul class="destination-list" id="rabbitmq-queues"></ul>
+            </div>
+
+            <div class="sidebar-footer">
+                <button id="add-destination-button" class="btn-primary">
+                    <i class="fas fa-plus"></i> Add Destination
+                </button>
+            </div>
+        </aside>
+
+        <!-- Content area -->
+        <section class="content">
+            <!-- Tabs -->
+            <div class="content-tabs">
+                <button class="tab-button active" data-tab="reader-tab">Reader</button>
+                <button class="tab-button" data-tab="publisher-tab">Publisher</button>
+                <button class="tab-button" data-tab="history-tab">History</button>
+            </div>
+
+            <!-- Tab content -->
+            <div class="tab-content">
+                <!-- Reader tab -->
+                <div class="tab-pane active" id="reader-tab">
+                    <div class="reader-controls">
+                        <div class="destination-selector">
+                            <label for="reader-destination">Destination:</label>
+                            <select id="reader-destination" class="form-control">
+                                <option value="">Select a destination</option>
+                            </select>
+                        </div>
+
+                        <div class="control-buttons">
+                            <button id="connect-button" class="btn-primary" disabled>
+                                <i class="fas fa-plug"></i> Connect
+                            </button>
+                            <button id="pause-button" class="btn-secondary" disabled>
+                                <i class="fas fa-pause"></i> Pause
+                            </button>
+                            <button id="clear-button" class="btn-secondary">
+                                <i class="fas fa-trash"></i> Clear
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="reader-container">
+                        <div class="message-list" id="message-list">
+                            <div class="empty-state">
+                                <i class="fas fa-inbox empty-icon"></i>
+                                <h3>No Messages</h3>
+                                <p>Select a destination and click Connect to start receiving messages</p>
+                            </div>
+                        </div>
+
+                        <div class="message-details" id="message-details">
+                            <div class="details-header">
+                                <h3>Message Details</h3>
+                            </div>
+                            <pre id="formatted-content" class="json-content">Select a message to view details</pre>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Publisher tab -->
+                <div class="tab-pane" id="publisher-tab">
+                    <div class="publisher-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="publish-destination">Destination:</label>
+                                <select id="publish-destination" class="form-control">
+                                    <option value="">Select a destination</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="message-type">Message Type:</label>
+                                <select id="message-type" class="form-control">
+                                    <option value="default">Default</option>
+                                    <option value="order">Order</option>
+                                    <option value="notification">Notification</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="message-input">Message Content (JSON):</label>
+                            <textarea id="message-input" class="form-control editor" rows="10" placeholder='{"key": "value"}'></textarea>
+                        </div>
+
+                        <div class="form-actions">
+                            <button id="publish-button" class="btn-primary" disabled>
+                                <i class="fas fa-paper-plane"></i> Publish Message
+                            </button>
+                            <button id="validate-button" class="btn-secondary">
+                                <i class="fas fa-check-circle"></i> Validate
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- History tab -->
+                <div class="tab-pane" id="history-tab">
+                    <div class="history-controls">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="history-destination">Destination:</label>
+                                <select id="history-destination" class="form-control">
+                                    <option value="">Select a destination</option>
+                                </select>
+                            </div>
+                            <div class="form-actions">
+                                <button id="load-history" class="btn-primary" disabled>
+                                    <i class="fas fa-search"></i> Load Messages
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="history-container">
+                        <div class="message-list" id="history-list">
+                            <div class="empty-state">
+                                <i class="fas fa-history empty-icon"></i>
+                                <h3>Message History</h3>
+                                <p>Select a destination and click Load Messages to view history</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+        <div class="footer-info">
+            <span>Message Hub v1.0.0</span>
+            <span>&copy; 2025 Message Hub</span>
+        </div>
+    </footer>
+</div>
+
+<!-- Login Modal -->
+<div class="modal" id="login-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Login</h2>
+            <button class="modal-close">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label for="username">Username:</label>
+                <input type="text" id="username" class="form-control" placeholder="Username">
+            </div>
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" class="form-control" placeholder="Password">
+            </div>
+            <div class="form-actions">
+                <button id="login-submit" class="btn-primary">Login</button>
+                <button class="btn-secondary modal-close">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="assets/js/app.js"></script>
+</body>
+</html>
