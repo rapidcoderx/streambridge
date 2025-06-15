@@ -24,7 +24,7 @@ const createConsumer = async (topic, options = {}) => {
         }
 
         // Generate consumer group ID if not provided
-        const groupId = options.groupId || `message-hub-${topic}-${Date.now()}`;
+        const groupId = options.groupId || `streambridge-${topic}-${Date.now()}`;
 
         // Create Kafka consumer
         const consumer = await createKafkaConsumer(groupId, topic, async (message) => {

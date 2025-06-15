@@ -4,11 +4,11 @@ const { logger } = require('../utils/logger');
 const { logAuditEvent } = require('../utils/logger');
 
 // Secret key for JWT signing and verification
-const JWT_SECRET = process.env.JWT_SECRET || 'message-hub-jwt-secret-key-change-in-production';
+const JWT_SECRET = process.env.JWT_SECRET || 'mstreambridge-jwt-secret-key-change-in-production';
 const JWT_EXPIRATION = process.env.JWT_EXPIRATION || '24h';
 const JWT_REFRESH_EXPIRATION = process.env.JWT_REFRESH_EXPIRATION || '7d';
-const JWT_ISSUER = process.env.JWT_ISSUER || 'message-hub';
-const JWT_AUDIENCE = process.env.JWT_AUDIENCE ? process.env.JWT_AUDIENCE.split(',') : ['message-hub-client'];
+const JWT_ISSUER = process.env.JWT_ISSUER || 'streambridge';
+const JWT_AUDIENCE = process.env.JWT_AUDIENCE ? process.env.JWT_AUDIENCE.split(',') : ['streambridge-client'];
 
 // Generate JWT token for authenticated user
 const generateToken = async (user) => {

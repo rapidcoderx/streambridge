@@ -60,7 +60,7 @@ The application consists of several components:
    - Backend API: http://localhost:5045
    - API Documentation: http://localhost:5045/api-docs
    - Kafka UI: http://localhost:8090
-   - RabbitMQ Management UI: http://localhost:15672 (Username: message-hub, Password: message-hub-password)
+   - RabbitMQ Management UI: http://localhost:15672 (Username: streambridge, Password: streambridge-password)
    - Prometheus: http://localhost:9090
    - Grafana: http://localhost:3001 (Username: admin, Password: admin)
 

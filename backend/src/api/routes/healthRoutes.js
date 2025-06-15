@@ -12,7 +12,7 @@ router.get('/', (req, res) => {
     res.status(200).json({
         status: 'ok',
         timestamp: new Date().toISOString(),
-        service: process.env.SERVICE_NAME || 'message-hub'
+        service: process.env.SERVICE_NAME || 'streambridge'
     });
 });
 
@@ -54,7 +54,7 @@ router.get('/detailed', async (req, res) => {
         res.status(200).json({
             status: systemStatus,
             timestamp: new Date().toISOString(),
-            service: process.env.SERVICE_NAME || 'message-hub',
+            service: process.env.SERVICE_NAME || 'streambridge',
             version: process.env.VERSION || '1.0.0',
             components: componentsStatus,
             websocket: {

@@ -56,7 +56,7 @@ const readableLogFormat = format.combine(
             metaStr = Object.keys(metadata).length ? `\n${JSON.stringify(metadata, null, 2)}` : '';
         }
 
-        const serviceName = service || 'message-hub';
+        const serviceName = service || 'streambridge';
         return `${timestamp} [${serviceName}] ${level}: ${message}${metaStr}`;
     })
 );
@@ -65,7 +65,7 @@ const readableLogFormat = format.combine(
 const logger = winston.createLogger({
     level: getLogLevel(),
     levels: logLevels.levels,
-    defaultMeta: { service: process.env.SERVICE_NAME || 'message-hub' },
+    defaultMeta: { service: process.env.SERVICE_NAME || 'streambridge' },
     format: process.env.NODE_ENV === 'production' ? structuredLogFormat : readableLogFormat,
     transports: [
         // Console transport

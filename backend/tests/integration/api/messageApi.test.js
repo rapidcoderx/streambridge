@@ -42,7 +42,7 @@ const generateTestToken = () => {
         process.env.JWT_SECRET || 'test-secret',
         {
             expiresIn: '1h',
-            issuer: 'message-hub-test',
+            issuer: 'streambridge-test',
             audience: 'test-client'
         }
     );

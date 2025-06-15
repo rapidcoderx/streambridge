@@ -4,8 +4,8 @@ const { publishMessage: publishToKafka } = require('../config/kafka');
 const { logger } = require('../utils/logger');
 
 // Error queue configuration
-const ERROR_QUEUE = process.env.ERROR_QUEUE || 'message-hub.error';
-const ERROR_TOPIC = process.env.ERROR_TOPIC || 'message-hub.errors';
+const ERROR_QUEUE = process.env.ERROR_QUEUE || 'streambridge.error';
+const ERROR_TOPIC = process.env.ERROR_TOPIC || 'streambridge.errors';
 const MAX_RETRIES = parseInt(process.env.MAX_RETRIES || '3');
 
 // Handle failed message processing
@@ -72,12 +72,12 @@ const sendToRetryQueue = async (source, errorMessage) => {
 
         // Send to appropriate retry mechanism based on source
         if (source === 'kafka') {
-            const retryTopic = process.env.RETRY_TOPIC || 'message-hub.retry';
+            const retryTopic = process.env.RETRY_TOPIC || 'streambridge.retry';
             await publishToKafka(retryTopic, retryMessage);
             logger.debug(`Failed message sent to Kafka retry topic ${retryTopic}`);
         } else {
-            const retryQueue = process.env.RETRY_QUEUE || 'message-hub.retry';
-            const retryExchange = process.env.RETRY_EXCHANGE || 'message-hub.retry';
+            const retryQueue = process.env.RETRY_QUEUE || 'streambridge.retry';
+            const retryExchange = process.env.RETRY_EXCHANGE || 'streambridge.retry';
 
             // Use message TTL for delayed retry if supported
             await publishToQueue(retryQueue, retryMessage, {
@@ -113,12 +113,12 @@ const sendToDeadLetterQueue = async (source, errorMessage) => {
 
         // Send to appropriate DLQ based on source
         if (source === 'kafka') {
-            const dlqTopic = process.env.DLQ_TOPIC || 'message-hub.dlq';
+            const dlqTopic = process.env.DLQ_TOPIC || 'streambridge.dlq';
             await publishToKafka(dlqTopic, dlqMessage);
             logger.debug(`Failed message sent to Kafka DLQ topic ${dlqTopic}`);
         } else {
-            const dlqQueue = process.env.DLQ_QUEUE || 'message-hub.dlq';
-            const dlqExchange = process.env.DLQ_EXCHANGE || 'message-hub.dlq';
+            const dlqQueue = process.env.DLQ_QUEUE || 'streambridge.dlq';
+            const dlqExchange = process.env.DLQ_EXCHANGE || 'streambridge.dlq';
 
             await publishToQueue(dlqQueue, dlqMessage, {
                 queueOptions: {
