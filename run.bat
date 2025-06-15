@@ -1,5 +1,5 @@
 @echo off
-REM Run script for Message Hub application
+REM Run script for StreamBridge application
 REM Usage: run.bat [start|stop|restart|status|logs|build]
 
 setlocal EnableDelayedExpansion
@@ -35,10 +35,10 @@ REM Create .env file if it doesn't exist
 if not exist "%ENV_FILE%" (
     echo Creating .env file with default values...
     (
-        echo # Message Hub Environment Configuration
+        echo # StreamBridge Environment Configuration
         echo.
         echo # JWT Authentication
-        echo JWT_SECRET=message-hub-jwt-secret-key-change-in-production
+        echo JWT_SECRET=streambridge-jwt-secret-key-change-in-production
         echo JWT_EXPIRATION=24h
         echo JWT_REFRESH_EXPIRATION=7d
         echo.
@@ -48,14 +48,14 @@ if not exist "%ENV_FILE%" (
         echo.
         echo # Kafka Configuration
         echo KAFKA_BROKERS=kafka:9092
-        echo KAFKA_CLIENT_ID=message-hub
+        echo KAFKA_CLIENT_ID=streambridge
         echo KAFKA_AUTO_CREATE_TOPICS=true
         echo.
         echo # RabbitMQ Configuration
         echo RABBITMQ_HOST=rabbitmq
         echo RABBITMQ_PORT=5672
-        echo RABBITMQ_USERNAME=message-hub
-        echo RABBITMQ_PASSWORD=message-hub-password
+        echo RABBITMQ_USERNAME=streambridge
+        echo RABBITMQ_PASSWORD=streambridge-password
         echo RABBITMQ_VHOST=/
         echo.
         echo # WebSocket Configuration
@@ -72,9 +72,9 @@ if not exist "%ENV_FILE%" (
         echo LOG_TO_FILE=true
         echo.
         echo # Application
-        echo SERVICE_NAME=message-hub
+        echo SERVICE_NAME=streambridge
         echo NODE_ENV=production
-        echo PORT=3000
+        echo PORT=5045
     ) > "%ENV_FILE%"
     echo .env file created successfully.
     echo Please review and update the values as needed.
@@ -82,20 +82,20 @@ if not exist "%ENV_FILE%" (
 
 REM Function to start the application
 :start_app
-    echo Starting Message Hub application...
+    echo Starting StreamBridge application...
     %COMPOSE_CMD% -f %COMPOSE_FILE% up -d
 
     if %ERRORLEVEL% equ 0 (
-        echo Message Hub application started successfully.
+        echo StreamBridge application started successfully.
         echo Frontend UI: http://localhost:8080
-        echo Backend API: http://localhost:3000
-        echo API Documentation: http://localhost:3000/api-docs
+        echo Backend API: http://localhost:5045
+        echo API Documentation: http://localhost:5045/api-docs
         echo Kafka UI: http://localhost:8090
         echo RabbitMQ Management UI: http://localhost:15672
-        echo Prometheus: http://localhost:9090
+        echo Prometheus: http://localhost:9091
         echo Grafana: http://localhost:3001 (admin/admin)
     ) else (
-        echo Failed to start Message Hub application.
+        echo Failed to start StreamBridge application.
         echo Check logs for more details: run.bat logs
     )
     exit /b 0
@@ -162,7 +162,7 @@ if "%1"=="logs" goto view_logs
 if "%1"=="build" goto build_app
 
 REM Show help if no valid command is provided
-echo Message Hub Application Management Script
+echo StreamBridge Application Management Script
 echo Usage: %0 [command]
 echo Commands:
 echo   start    - Start the application

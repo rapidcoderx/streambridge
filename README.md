@@ -1,4 +1,4 @@
-# Message Hub - Kafka and RabbitMQ Client
+# StreamBridge - Kafka and RabbitMQ Client
 
 A comprehensive full-stack application for publishing and consuming messages from Kafka and RabbitMQ with a responsive web UI.
 
@@ -42,8 +42,8 @@ The application consists of several components:
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/example/message-hub.git
-   cd message-hub
+   git clone https://github.com/example/streambridge.git
+   cd streambridge
    ```
 
 2. Start the application with Docker Compose:
@@ -57,8 +57,8 @@ The application consists of several components:
 
 3. Access the application:
    - Frontend UI: http://localhost:8080
-   - Backend API: http://localhost:3000
-   - API Documentation: http://localhost:3000/api-docs
+   - Backend API: http://localhost:5045
+   - API Documentation: http://localhost:5045/api-docs
    - Kafka UI: http://localhost:8090
    - RabbitMQ Management UI: http://localhost:15672 (Username: message-hub, Password: message-hub-password)
    - Prometheus: http://localhost:9090
@@ -71,7 +71,7 @@ The application can be configured using environment variables in the `.env` file
 ### Important Configuration Options
 
 #### Backend
-- `PORT`: The port for the backend API server (default: 3000)
+- `PORT`: The port for the backend API server (default: 5045)
 - `JWT_SECRET`: Secret key for JWT token generation and validation
 - `ENCRYPTION_KEY`: Key for message encryption/decryption
 - `KAFKA_BROKERS`: Comma-separated list of Kafka brokers
@@ -79,12 +79,12 @@ The application can be configured using environment variables in the `.env` file
 - `LOG_LEVEL`: Logging level (default: info)
 
 #### Frontend
-- `API_URL`: URL of the backend API (default: http://localhost:3000)
-- `WEBSOCKET_URL`: URL of the WebSocket server (default: ws://localhost:3000/ws)
+- `API_URL`: URL of the backend API (default: http://localhost:5045)
+- `WEBSOCKET_URL`: URL of the WebSocket server (default: ws://localhost:5045/ws)
 
 ## API Documentation
 
-The API is documented using Swagger UI and is available at http://localhost:3000/api-docs when the application is running.
+The API is documented using Swagger UI and is available at http://localhost:5045/api-docs when the application is running.
 
 ### Key Endpoints
 
@@ -97,7 +97,7 @@ The API is documented using Swagger UI and is available at http://localhost:3000
 
 ## WebSocket API
 
-The WebSocket server is available at ws://localhost:3000/ws and supports the following features:
+The WebSocket server is available at ws://localhost:5045/ws and supports the following features:
 
 - Subscribe to specific destinations
 - Receive real-time messages
@@ -106,7 +106,7 @@ The WebSocket server is available at ws://localhost:3000/ws and supports the fol
 ### Example Connection
 
 ```javascript
-const ws = new WebSocket('ws://localhost:3000/ws?destination=kafka://my-topic&token=jwt-token');
+const ws = new WebSocket('ws://localhost:5045/ws?destination=kafka://my-topic&token=jwt-token');
 
 ws.onmessage = (event) => {
   const message = JSON.parse(event.data);

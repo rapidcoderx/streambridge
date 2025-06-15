@@ -7,7 +7,7 @@ const { encryptData, decryptData } = require('../utils/encryption');
 const createKafkaClient = () => {
     try {
         const brokers = process.env.KAFKA_BROKERS ? process.env.KAFKA_BROKERS.split(',') : ['localhost:9092'];
-        const clientId = process.env.KAFKA_CLIENT_ID || 'message-hub';
+        const clientId = process.env.KAFKA_CLIENT_ID || 'streambridge';
 
         // SSL configuration (if enabled)
         let ssl = undefined;
@@ -116,7 +116,7 @@ const createConsumer = async (groupId, topics, messageHandler) => {
         }
 
         const consumer = kafkaClient.consumer({
-            groupId: groupId || `message-hub-${Date.now()}`,
+            groupId: groupId || `streambridge-${Date.now()}`,
             sessionTimeout: parseInt(process.env.KAFKA_SESSION_TIMEOUT || '30000'),
             heartbeatInterval: parseInt(process.env.KAFKA_HEARTBEAT_INTERVAL || '3000'),
         });

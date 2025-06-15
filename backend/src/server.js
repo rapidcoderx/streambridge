@@ -10,7 +10,7 @@ const { connectRabbitMQ, disconnectRabbitMQ } = require('./config/rabbitmq');
 const { initializeMetrics } = require('./metrics/prometheus');
 
 // Environment variables
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5045;
 const USE_HTTPS = process.env.USE_HTTPS === 'true';
 
 // Create HTTP or HTTPS server

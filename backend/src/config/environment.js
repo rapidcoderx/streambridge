@@ -10,8 +10,8 @@ dotenv.config({ path: path.resolve(process.cwd(), '.env') });
 const environment = {
     // Application
     NODE_ENV: process.env.NODE_ENV || 'development',
-    PORT: parseInt(process.env.PORT || '3000', 10),
-    SERVICE_NAME: process.env.SERVICE_NAME || 'message-hub',
+    PORT: parseInt(process.env.PORT || '5045', 10),
+    SERVICE_NAME: process.env.SERVICE_NAME || 'streambridge',
     VERSION: process.env.VERSION || '1.0.0',
 
     // HTTPS/SSL
@@ -23,11 +23,11 @@ const environment = {
     ALLOWED_ORIGINS: process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : ['*'],
 
     // Authentication
-    JWT_SECRET: process.env.JWT_SECRET || 'message-hub-jwt-secret-key-change-in-production',
+    JWT_SECRET: process.env.JWT_SECRET || 'streambridge-jwt-secret-key-change-in-production',
     JWT_EXPIRATION: process.env.JWT_EXPIRATION || '24h',
     JWT_REFRESH_EXPIRATION: process.env.JWT_REFRESH_EXPIRATION || '7d',
-    JWT_ISSUER: process.env.JWT_ISSUER || 'message-hub',
-    JWT_AUDIENCE: process.env.JWT_AUDIENCE ? process.env.JWT_AUDIENCE.split(',') : ['message-hub-client'],
+    JWT_ISSUER: process.env.JWT_ISSUER || 'streambridge',
+    JWT_AUDIENCE: process.env.JWT_AUDIENCE ? process.env.JWT_AUDIENCE.split(',') : ['streambridge-client'],
     USE_REFRESH_TOKENS: process.env.USE_REFRESH_TOKENS === 'true',
 
     // Rate limiting
@@ -47,7 +47,7 @@ const environment = {
 
     // Kafka
     KAFKA_BROKERS: process.env.KAFKA_BROKERS ? process.env.KAFKA_BROKERS.split(',') : ['localhost:9092'],
-    KAFKA_CLIENT_ID: process.env.KAFKA_CLIENT_ID || 'message-hub',
+    KAFKA_CLIENT_ID: process.env.KAFKA_CLIENT_ID || 'streambridge',
     KAFKA_USE_SSL: process.env.KAFKA_USE_SSL === 'true',
     KAFKA_REJECT_UNAUTHORIZED: process.env.KAFKA_REJECT_UNAUTHORIZED !== 'false',
     KAFKA_CA_CERT: process.env.KAFKA_CA_CERT,
@@ -84,12 +84,12 @@ const environment = {
     RABBITMQ_PUBLISHER_CONFIRMS: process.env.RABBITMQ_PUBLISHER_CONFIRMS === 'true',
 
     // Error Handling
-    ERROR_QUEUE: process.env.ERROR_QUEUE || 'message-hub.error',
-    ERROR_TOPIC: process.env.ERROR_TOPIC || 'message-hub.errors',
-    RETRY_QUEUE: process.env.RETRY_QUEUE || 'message-hub.retry',
-    RETRY_TOPIC: process.env.RETRY_TOPIC || 'message-hub.retry',
-    DLQ_QUEUE: process.env.DLQ_QUEUE || 'message-hub.dlq',
-    DLQ_TOPIC: process.env.DLQ_TOPIC || 'message-hub.dlq',
+    ERROR_QUEUE: process.env.ERROR_QUEUE || 'streambridge.error',
+    ERROR_TOPIC: process.env.ERROR_TOPIC || 'streambridge.errors',
+    RETRY_QUEUE: process.env.RETRY_QUEUE || 'streambridge.retry',
+    RETRY_TOPIC: process.env.RETRY_TOPIC || 'streambridge.retry',
+    DLQ_QUEUE: process.env.DLQ_QUEUE || 'streambridge.dlq',
+    DLQ_TOPIC: process.env.DLQ_TOPIC || 'streambridge.dlq',
     MAX_RETRIES: parseInt(process.env.MAX_RETRIES || '3', 10),
     REQUEUE_FAILED_MESSAGES: process.env.REQUEUE_FAILED_MESSAGES === 'true',
 
@@ -113,7 +113,7 @@ const environment = {
 const validateConfig = () => {
     // Warn about insecure defaults in production
     if (environment.NODE_ENV === 'production') {
-        if (environment.JWT_SECRET === 'message-hub-jwt-secret-key-change-in-production') {
+        if (environment.JWT_SECRET === 'streambridge-jwt-secret-key-change-in-production') {
             logger.warn('WARNING: Using default JWT_SECRET in production environment!');
         }
 

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Run script for Message Hub application
+# Run script for StreamBridge application
 # Usage: ./run.sh [start|stop|restart|status|logs|build]
 
 # Color definitions
@@ -39,10 +39,10 @@ fi
 if [ ! -f "$ENV_FILE" ]; then
     echo -e "${YELLOW}Creating .env file with default values...${NC}"
     cat > "$ENV_FILE" << EOF
-# Message Hub Environment Configuration
+# StreamBridge Environment Configuration
 
 # JWT Authentication
-JWT_SECRET=message-hub-jwt-secret-key-change-in-production
+JWT_SECRET=streambridge-jwt-secret-key-change-in-production
 JWT_EXPIRATION=24h
 JWT_REFRESH_EXPIRATION=7d
 
@@ -52,14 +52,14 @@ ENCRYPTION_KEY=01234567890123456789012345678901
 
 # Kafka Configuration
 KAFKA_BROKERS=kafka:9092
-KAFKA_CLIENT_ID=message-hub
+KAFKA_CLIENT_ID=streambridge
 KAFKA_AUTO_CREATE_TOPICS=true
 
 # RabbitMQ Configuration
 RABBITMQ_HOST=rabbitmq
 RABBITMQ_PORT=5672
-RABBITMQ_USERNAME=message-hub
-RABBITMQ_PASSWORD=message-hub-password
+RABBITMQ_USERNAME=streambridge
+RABBITMQ_PASSWORD=streambridge-password
 RABBITMQ_VHOST=/
 
 # WebSocket Configuration
@@ -76,9 +76,9 @@ LOG_LEVEL=info
 LOG_TO_FILE=true
 
 # Application
-SERVICE_NAME=message-hub
+SERVICE_NAME=streambridge
 NODE_ENV=production
-PORT=3000
+PORT=5045
 EOF
     echo -e "${GREEN}.env file created successfully.${NC}"
     echo -e "${YELLOW}Please review and update the values as needed.${NC}"
@@ -86,51 +86,51 @@ fi
 
 # Function to start the application
 start_app() {
-    echo -e "${BLUE}Starting Message Hub application...${NC}"
+    echo -e "${BLUE}Starting StreamBridge application...${NC}"
     $COMPOSE_CMD -f $COMPOSE_FILE up -d
 
     if [ $? -eq 0 ]; then
-        echo -e "${GREEN}Message Hub application started successfully.${NC}"
+        echo -e "${GREEN}StreamBridge application started successfully.${NC}"
         echo -e "Frontend UI: ${BLUE}http://localhost:8080${NC}"
-        echo -e "Backend API: ${BLUE}http://localhost:3000${NC}"
-        echo -e "API Documentation: ${BLUE}http://localhost:3000/api-docs${NC}"
+        echo -e "Backend API: ${BLUE}http://localhost:5045${NC}"
+        echo -e "API Documentation: ${BLUE}http://localhost:5045/api-docs${NC}"
         echo -e "Kafka UI: ${BLUE}http://localhost:8090${NC}"
         echo -e "RabbitMQ Management UI: ${BLUE}http://localhost:15672${NC}"
-        echo -e "Prometheus: ${BLUE}http://localhost:9090${NC}"
+        echo -e "Prometheus: ${BLUE}http://localhost:9091${NC}"
         echo -e "Grafana: ${BLUE}http://localhost:3001${NC} (admin/admin)"
     else
-        echo -e "${RED}Failed to start Message Hub application.${NC}"
+        echo -e "${RED}Failed to start StreamBridge application.${NC}"
         echo "Check logs for more details: ./run.sh logs"
     fi
 }
 
 # Function to stop the application
 stop_app() {
-    echo -e "${BLUE}Stopping Message Hub application...${NC}"
+    echo -e "${BLUE}Stopping StreamBridge application...${NC}"
     $COMPOSE_CMD -f $COMPOSE_FILE down
 
     if [ $? -eq 0 ]; then
-        echo -e "${GREEN}Message Hub application stopped successfully.${NC}"
+        echo -e "${GREEN}StreamBridge application stopped successfully.${NC}"
     else
-        echo -e "${RED}Failed to stop Message Hub application.${NC}"
+        echo -e "${RED}Failed to stop StreamBridge application.${NC}"
     fi
 }
 
 # Function to restart the application
 restart_app() {
-    echo -e "${BLUE}Restarting Message Hub application...${NC}"
+    echo -e "${BLUE}Restarting StreamBridge application...${NC}"
     $COMPOSE_CMD -f $COMPOSE_FILE restart
 
     if [ $? -eq 0 ]; then
-        echo -e "${GREEN}Message Hub application restarted successfully.${NC}"
+        echo -e "${GREEN}StreamBridge application restarted successfully.${NC}"
     else
-        echo -e "${RED}Failed to restart Message Hub application.${NC}"
+        echo -e "${RED}Failed to restart StreamBridge application.${NC}"
     fi
 }
 
 # Function to check the status of the application
 check_status() {
-    echo -e "${BLUE}Checking Message Hub application status...${NC}"
+    echo -e "${BLUE}Checking StreamBridge application status...${NC}"
     $COMPOSE_CMD -f $COMPOSE_FILE ps
 }
 
@@ -147,13 +147,13 @@ view_logs() {
 
 # Function to build the application
 build_app() {
-    echo -e "${BLUE}Building Message Hub application...${NC}"
+    echo -e "${BLUE}Building StreamBridge application...${NC}"
     $COMPOSE_CMD -f $COMPOSE_FILE build
 
     if [ $? -eq 0 ]; then
-        echo -e "${GREEN}Message Hub application built successfully.${NC}"
+        echo -e "${GREEN}StreamBridge application built successfully.${NC}"
     else
-        echo -e "${RED}Failed to build Message Hub application.${NC}"
+        echo -e "${RED}Failed to build StreamBridge application.${NC}"
     fi
 }
 
@@ -178,7 +178,7 @@ case "$1" in
         build_app
         ;;
     *)
-        echo -e "${YELLOW}Message Hub Application Management Script${NC}"
+        echo -e "${YELLOW}StreamBridge Application Management Script${NC}"
         echo -e "Usage: $0 [command]"
         echo -e "Commands:"
         echo -e "  start    - Start the application"

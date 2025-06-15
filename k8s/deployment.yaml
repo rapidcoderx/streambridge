@@ -1,14 +1,14 @@
-# Message Hub Kubernetes Deployment Configuration
+# StreamBridge Kubernetes Deployment Configuration
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: message-hub-config
+  name: streambridge-config
   labels:
-    app: message-hub
+    app: streambridge
 data:
   NODE_ENV: "production"
-  PORT: "3000"
-  SERVICE_NAME: "message-hub"
+  PORT: "5045"
+  SERVICE_NAME: "streambridge"
   WEBSOCKET_PATH: "/ws"
   KAFKA_BROKERS: "kafka-service:9092"
   RABBITMQ_HOST: "rabbitmq-service"
@@ -21,9 +21,9 @@ data:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: message-hub-secrets
+  name: streambridge-secrets
   labels:
-    app: message-hub
+    app: streambridge
 type: Opaque
 data:
   # These are example values, replace with real encoded secrets in production
@@ -36,15 +36,15 @@ data:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: message-hub-backend
+  name: streambridge-backend
   labels:
-    app: message-hub
+    app: streambridge
     component: backend
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: message-hub
+      app: streambridge
       component: backend
   strategy:
     type: RollingUpdate
@@ -54,25 +54,25 @@ spec:
   template:
     metadata:
       labels:
-        app: message-hub
+        app: streambridge
         component: backend
       annotations:
         prometheus.io/scrape: "true"
-        prometheus.io/port: "3000"
+        prometheus.io/port: "5045"
         prometheus.io/path: "/metrics"
     spec:
       containers:
         - name: backend
-          image: message-hub-backend:latest
+          image: streambridge-backend:latest
           imagePullPolicy: Always
           ports:
-            - containerPort: 3000
+            - containerPort: 5045
               name: http
           envFrom:
             - configMapRef:
-                name: message-hub-config
+                name: streambridge-config
             - secretRef:
-                name: message-hub-secrets
+                name: streambridge-secrets
           resources:
             requests:
               cpu: 200m
@@ -83,7 +83,7 @@ spec:
           livenessProbe:
             httpGet:
               path: /health
-              port: 3000
+              port: 5045
             initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 5
@@ -91,7 +91,7 @@ spec:
           readinessProbe:
             httpGet:
               path: /health/detailed
-              port: 3000
+              port: 5045
             initialDelaySeconds: 10
             periodSeconds: 5
             timeoutSeconds: 3
@@ -106,15 +106,15 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: message-hub-frontend
+  name: streambridge-frontend
   labels:
-    app: message-hub
+    app: streambridge
     component: frontend
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: message-hub
+      app: streambridge
       component: frontend
   strategy:
     type: RollingUpdate
@@ -124,12 +124,12 @@ spec:
   template:
     metadata:
       labels:
-        app: message-hub
+        app: streambridge
         component: frontend
     spec:
       containers:
         - name: frontend
-          image: message-hub-frontend:latest
+          image: streambridge-frontend:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 80
@@ -161,25 +161,25 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: message-hub-backend
+  name: streambridge-backend
   labels:
-    app: message-hub
+    app: streambridge
     component: backend
 spec:
   ports:
-    - port: 3000
-      targetPort: 3000
+    - port: 5045
+      targetPort: 5045
       name: http
   selector:
-    app: message-hub
+    app: streambridge
     component: backend
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: message-hub-frontend
+  name: streambridge-frontend
   labels:
-    app: message-hub
+    app: streambridge
     component: frontend
 spec:
   ports:
@@ -187,15 +187,15 @@ spec:
       targetPort: 80
       name: http
   selector:
-    app: message-hub
+    app: streambridge
     component: frontend
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: message-hub-ingress
+  name: streambridge-ingress
   labels:
-    app: message-hub
+    app: streambridge
   annotations:
     kubernetes.io/ingress.class: "nginx"
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
@@ -205,56 +205,56 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
 spec:
   rules:
-    - host: message-hub.example.com
+    - host: streambridge.example.com
       http:
         paths:
           - path: /api(/|$)(.*)
             pathType: Prefix
             backend:
               service:
-                name: message-hub-backend
+                name: streambridge-backend
                 port:
-                  number: 3000
+                  number: 5045
           - path: /ws
             pathType: Exact
             backend:
               service:
-                name: message-hub-backend
+                name: streambridge-backend
                 port:
-                  number: 3000
+                  number: 5045
           - path: /metrics
             pathType: Exact
             backend:
               service:
-                name: message-hub-backend
+                name: streambridge-backend
                 port:
-                  number: 3000
+                  number: 5045
           - path: /health(/|$)(.*)
             pathType: Prefix
             backend:
               service:
-                name: message-hub-backend
+                name: streambridge-backend
                 port:
-                  number: 3000
+                  number: 5045
           - path: /(.*)
             pathType: Prefix
             backend:
               service:
-                name: message-hub-frontend
+                name: streambridge-frontend
                 port:
                   number: 80
 ---
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: message-hub-backend-hpa
+  name: streambridge-backend-hpa
   labels:
-    app: message-hub
+    app: streambridge
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: message-hub-backend
+    name: streambridge-backend
   minReplicas: 2
   maxReplicas: 10
   metrics:
@@ -274,14 +274,14 @@ spec:
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: message-hub-frontend-hpa
+  name: streambridge-frontend-hpa
   labels:
-    app: message-hub
+    app: streambridge
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: message-hub-frontend
+    name: streambridge-frontend
   minReplicas: 2
   maxReplicas: 6
   metrics:

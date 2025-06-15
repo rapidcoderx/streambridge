@@ -1,5 +1,5 @@
 {
-  "name": "message-hub",
+  "name": "streambridge",
   "version": "1.0.0",
   "description": "Message reader/publisher for Kafka and RabbitMQ",
   "main": "src/server.js",
@@ -12,7 +12,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
     "format": "prettier --write \"**/*.{js,json,md}\"",
-    "docker:build": "docker build -t message-hub .",
+    "docker:build": "docker build -t streambridge .",
     "docker:start": "docker-compose up -d",
     "docker:stop": "docker-compose down"
   },

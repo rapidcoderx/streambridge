@@ -77,7 +77,7 @@ export const options = {
 
 // Test setup - generate auth token
 const getAuthToken = () => {
-    const loginUrl = 'http://localhost:3000/api/auth/login';
+    const loginUrl = 'http://localhost:5045/api/auth/login';
     const payload = JSON.stringify({
         username: 'admin',
         password: 'admin123'
@@ -136,7 +136,7 @@ export default function(data) {
     const protocol = useKafka ? 'kafka' : 'rabbitmq';
 
     // Prepare request data
-    const url = 'http://localhost:3000/api/messages';
+    const url = 'http://localhost:5045/api/messages';
     const payload = JSON.stringify({
         destination: `${protocol}://${destination}`,
         message: generateMessage(),

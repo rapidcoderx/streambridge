@@ -1,8 +1,8 @@
 openapi: 3.0.3
 info:
-  title: Message Hub API
+  title: StreamBridge API
   description: |-
-    API for the Message Hub service, providing capabilities to publish and consume messages from Kafka and RabbitMQ.
+    API for the StreamBridge service, providing capabilities to publish and consume messages from Kafka and RabbitMQ.
   version: 1.0.0
   contact:
     email: support@example.com
@@ -11,9 +11,9 @@ info:
     url: https://opensource.org/licenses/MIT
 
 servers:
-  - url: http://localhost:3000
+  - url: http://localhost:5045
     description: Local development server
-  - url: https://message-hub.example.com
+  - url: https://streambridge.example.com
     description: Production server
 
 tags:

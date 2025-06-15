@@ -1,27 +1,25 @@
-version: '3.8'
-
 services:
   # Backend Node.js application
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    image: message-hub-backend:latest
-    container_name: message-hub-backend
+    image: streambridge-backend:latest
+    container_name: streambridge-backend
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "5045:5045"
     environment:
       - NODE_ENV=production
-      - PORT=3000
+      - PORT=5045
       - LOG_LEVEL=info
       - KAFKA_BROKERS=kafka:9092
       - RABBITMQ_HOST=rabbitmq
       - RABBITMQ_PORT=5672
-      - RABBITMQ_USERNAME=message-hub
-      - RABBITMQ_PASSWORD=message-hub-password
+      - RABBITMQ_USERNAME=streambridge
+      - RABBITMQ_PASSWORD=streambridge-password
       - RABBITMQ_VHOST=/
-      - JWT_SECRET=${JWT_SECRET:-message-hub-jwt-secret-key-change-in-production}
+      - JWT_SECRET=${JWT_SECRET:-streambridge-jwt-secret-key-change-in-production}
       - ENCRYPT_MESSAGES=true
       - ENCRYPTION_KEY=${ENCRYPTION_KEY:-01234567890123456789012345678901}
       - ALLOWED_ORIGINS=http://localhost:8080
@@ -32,9 +30,9 @@ services:
       - kafka
       - rabbitmq
     networks:
-      - message-hub-network
+      - streambridge-network
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5045/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -45,15 +43,15 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    image: message-hub-frontend:latest
-    container_name: message-hub-frontend
+    image: streambridge-frontend:latest
+    container_name: streambridge-frontend
     restart: unless-stopped
     ports:
       - "8080:80"
     depends_on:
       - backend
     networks:
-      - message-hub-network
+      - streambridge-network
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/"]
       interval: 30s
@@ -64,18 +62,17 @@ services:
   # Kafka
   zookeeper:
     image: confluentinc/cp-zookeeper:7.4.0
-    container_name: message-hub-zookeeper
+    container_name: streambridge-zookeeper
     restart: unless-stopped
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
-    ports:
-      - "2181:2181"
+    # Not exposing ZooKeeper port externally as it's only used within the container network
     volumes:
       - zookeeper_data:/var/lib/zookeeper/data
       - zookeeper_log:/var/lib/zookeeper/log
     networks:
-      - message-hub-network
+      - streambridge-network
     healthcheck:
       test: ["CMD", "nc", "-z", "localhost", "2181"]
       interval: 30s
@@ -85,12 +82,11 @@ services:
 
   kafka:
     image: confluentinc/cp-kafka:7.4.0
-    container_name: message-hub-kafka
+    container_name: streambridge-kafka
     restart: unless-stopped
     depends_on:
       - zookeeper
-    ports:
-      - "9092:9092"
+    # Not exposing Kafka port externally as it's only used within the container network
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
@@ -103,7 +99,7 @@ services:
     volumes:
       - kafka_data:/var/lib/kafka/data
     networks:
-      - message-hub-network
+      - streambridge-network
     healthcheck:
       test: ["CMD", "nc", "-z", "localhost", "9092"]
       interval: 30s
@@ -112,35 +108,35 @@ services:
       start_period: 30s
 
   kafka-ui:
-    image: provectuslabs/kafka-ui:latest
-    container_name: message-hub-kafka-ui
+    image: kafbat/kafka-ui:latest
+    container_name: streambridge-kafka-ui
     restart: unless-stopped
     ports:
       - "8090:8080"
     environment:
-      KAFKA_CLUSTERS_0_NAME: message-hub
+      KAFKA_CLUSTERS_0_NAME: streambridge
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
       KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
     depends_on:
       - kafka
     networks:
-      - message-hub-network
+      - streambridge-network
 
   # RabbitMQ
   rabbitmq:
     image: rabbitmq:3.12-management-alpine
-    container_name: message-hub-rabbitmq
+    container_name: streambridge-rabbitmq
     restart: unless-stopped
     environment:
-      RABBITMQ_DEFAULT_USER: message-hub
-      RABBITMQ_DEFAULT_PASS: message-hub-password
+      RABBITMQ_DEFAULT_USER: streambridge
+      RABBITMQ_DEFAULT_PASS: streambridge-password
     ports:
       - "5672:5672"
       - "15672:15672"
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
     networks:
-      - message-hub-network
+      - streambridge-network
     healthcheck:
       test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
       interval: 30s
@@ -151,15 +147,15 @@ services:
   # Prometheus for metrics
   prometheus:
     image: prom/prometheus:latest
-    container_name: message-hub-prometheus
+    container_name: streambridge-prometheus
     restart: unless-stopped
     ports:
-      - "9090:9090"
+      - "9091:9090"
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus_data:/prometheus
     networks:
-      - message-hub-network
+      - streambridge-network
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
@@ -176,7 +172,7 @@ services:
   # Grafana for visualization
   grafana:
     image: grafana/grafana:latest
-    container_name: message-hub-grafana
+    container_name: streambridge-grafana
     restart: unless-stopped
     ports:
       - "3001:3000"
@@ -199,7 +195,7 @@ services:
       start_period: 10s
 
 networks:
-  message-hub-network:
+  streambridge-network:
     driver: bridge
 
 volumes:

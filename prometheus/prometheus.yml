@@ -8,13 +8,13 @@ scrape_configs:
     static_configs:
       - targets: ['localhost:9090']
 
-  - job_name: 'message-hub-backend'
+  - job_name: 'streambridge-backend'
     metrics_path: /metrics
     scrape_interval: 10s
     static_configs:
-      - targets: ['backend:3000']
+      - targets: ['backend:5045']
         labels:
-          service: 'message-hub'
+          service: 'streambridge'
           environment: 'production'
 
   - job_name: 'kafka'

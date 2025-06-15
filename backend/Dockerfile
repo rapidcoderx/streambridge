@@ -1,5 +1,5 @@
 # Backend Dockerfile
-FROM node:18-alpine as builder
+FROM node:lts-bookworm-slim AS builder
 
 # Set working directory
 WORKDIR /app
@@ -8,18 +8,18 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install dependencies
-RUN npm ci --only=production
+RUN npm install --omit=dev
 
 # From here we load our application's code
-FROM node:18-alpine as runtime
+FROM node:lts-bookworm-slim AS runtime
 
-# Install system dependencies
-RUN apk --no-cache add dumb-init
+# Install dumb-init for proper signal handling
+RUN apt-get update && apt-get install -y --no-install-recommends dumb-init && rm -rf /var/lib/apt/lists/*
 
 # Create app directory and set to non-root user
 WORKDIR /app
-RUN addgroup -g 1001 appuser && \
-    adduser -S -u 1001 -G appuser appuser && \
+RUN groupadd -g 1001 appuser && \
+    useradd -u 1001 -g appuser -m appuser && \
     chown -R appuser:appuser /app
 
 # Set environment variables
@@ -38,7 +38,7 @@ RUN mkdir -p logs && chown -R appuser:appuser logs
 USER appuser
 
 # Expose ports
-EXPOSE 3000
+EXPOSE 5045
 
 # Use dumb-init as entrypoint to handle signals properly
 ENTRYPOINT ["dumb-init", "--"]

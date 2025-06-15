@@ -1,4 +1,4 @@
-# Message Hub GraphQL Schema
+# StreamBridge GraphQL Schema
 
 """
 Message resource representing a message in a topic or queue

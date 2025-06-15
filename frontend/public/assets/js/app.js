@@ -1,9 +1,9 @@
-// Message Hub App - Main JavaScript
+// StreamBridge App - Main JavaScript
 
 // Configuration
 const config = {
-    apiUrl: 'http://localhost:3000',
-    wsUrl: 'ws://localhost:3000/ws',
+    apiUrl: 'http://localhost:5045',
+    wsUrl: 'ws://localhost:5045/ws',
     maxMessages: 1000,
     reconnectInterval: 5000,
     autoReconnect: true,
